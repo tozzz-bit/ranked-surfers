@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amber | Ranked Subway Surfers</title>
+<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+<style>
+  *{box-sizing:border-box}
+  :root{--bg:#0a0a0e;--card:#14141b;--line:rgba(255,255,255,.09);--text:#ececf1;--muted:#9aa0aa;--accent:#f59e0b;--radius:14px}
+  html,body{height:100%}
+  body{margin:0;color:var(--text);background:var(--bg);
+    background-image:radial-gradient(1100px 520px at 50% -12%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 70%);
+    font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{margin:0;letter-spacing:-.02em}
+  .muted{color:var(--muted)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#1c1c25;
+    border:1px solid var(--line);color:var(--text);font:inherit;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:rgba(255,255,255,.3);transform:translateY(-1px)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1206}
+  .btn.ghost{background:transparent}
+  .btn.danger{background:#2a1315;border-color:#7f1d1d;color:#fca5a5}
+  .btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  .nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:20px;padding:12px 22px;
+    background:rgba(10,10,14,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.03em}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--accent);box-shadow:0 0 14px var(--accent)}
+  .links{display:flex;gap:4px;margin-left:8px;flex-wrap:wrap}
+  .links a{padding:7px 13px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);transition:.15s}
+  .links a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+  .links a.active{color:var(--text);background:rgba(255,255,255,.08)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+  #app{max-width:1060px;margin:0 auto;padding:28px 22px 80px}
+  .view{display:none}
+  .view.active{display:block;animation:fade .22s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .card-head h2{font-size:16px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+
+  .hero{text-align:center;padding:52px 0 40px}
+  .hero h1{font-size:clamp(46px,9vw,84px);font-weight:900;letter-spacing:-.05em;line-height:.95;
+    background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .tag{color:var(--muted);font-size:17px;margin:10px 0 26px;letter-spacing:.02em}
+  .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .stat .v{font-size:24px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .lb-row{display:flex;align-items:center;gap:13px;padding:11px 6px;border-radius:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .lb-row:last-child{border-bottom:0}
+  .lb-row.me{background:color-mix(in srgb,var(--accent) 12%,transparent);border-bottom-color:transparent}
+  .rank{width:38px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+  .rank.m1{color:#fbbf24}.rank.m2{color:#cbd5e1}.rank.m3{color:#d97706}
+  .lb-who{flex:1;min-width:0}
+  .lb-name{font-weight:700;display:flex;align-items:center;gap:7px}
+  .lb-status{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-score{font-weight:800;font-variant-numeric:tabular-nums;font-size:16px}
+  .tag-demo{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.1);color:var(--muted)}
+  .tag-online{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 5px;border-radius:5px;background:color-mix(in srgb,var(--accent) 25%,transparent);color:var(--accent)}
+
+  .avatar{width:var(--s,36px);height:var(--s,36px);border-radius:50%;object-fit:cover;display:inline-flex;
+    align-items:center;justify-content:center;font-size:calc(var(--s,36px)*.52);flex:0 0 auto;
+    border:1px solid rgba(255,255,255,.14);overflow:hidden}
+
+  label.field{display:block;margin-bottom:14px}
+  label.field>span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input[type=text],input[type=password],input[type=number],textarea,select{width:100%;padding:11px 13px;border-radius:10px;
+    background:#0e0e14;color:var(--text);border:1px solid var(--line);font:inherit;outline:none;transition:.15s}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+  textarea{resize:vertical;min-height:78px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  input[type=color]{width:52px;height:34px;padding:2px;background:#0e0e14;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+  .row:last-child{border-bottom:0}
+  .row .label{font-weight:600}
+  .row .hint{font-size:12.5px;color:var(--muted);margin-top:3px;max-width:440px}
+  .switch{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{padding:5px 10px;border-radius:20px;background:#1c1c25;border:1px solid var(--line);font-size:12.5px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chips .chip.emoji{font-size:16px;padding:4px 8px}
+  .err{color:#fca5a5;font-size:13.5px;margin-top:4px;min-height:18px}
+
+  /* ---------- play view ---------- */
+  body.playing .nav{display:none}
+  body.playing #app{max-width:none;padding:0}
+  .view[data-view=play].active{position:fixed;inset:0;padding:0}
+  #frame-wrap{position:absolute;inset:0;overflow:hidden;background:#000}
+  #game{width:100%;height:100%;border:0;display:block}
+  body.stretched #game,body.stretched #game-online{position:absolute;width:1024px;height:768px;left:50%;top:50%}
+  #capture-layer{position:absolute;inset:0;z-index:5000;cursor:crosshair;outline:none}
+  #capture-layer[hidden]{display:none}
+
+  .play-toolbar{position:absolute;bottom:14px;right:14px;z-index:7000;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+  .play-toolbar button{padding:8px 11px;border-radius:9px;cursor:pointer;font:13px system-ui,sans-serif;
+    background:rgba(15,15,20,.78);color:#e8e8ea;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);transition:.15s}
+  .play-toolbar button:hover{border-color:rgba(255,255,255,.45)}
+  .play-toolbar button.on{background:color-mix(in srgb,var(--accent) 70%,#000);border-color:var(--accent);color:#160f04}
+  #rec-btn.recording{background:#7f1d1d;border-color:#ef4444;animation:pulse 1.2s infinite}
+  @keyframes pulse{50%{opacity:.55}}
+
+  #hud{position:absolute;top:14px;left:14px;z-index:7000;min-width:224px;padding:10px 12px;border-radius:10px;
+    font:12px/1.5 ui-monospace,Menlo,monospace;color:#e8e8ea;background:rgba(10,10,14,.74);
+    border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)}
+  #hud[hidden]{display:none}
+  #hud .l{display:flex;justify-content:space-between;gap:14px}
+  #hud .k{color:#9ca3af}
+  #hud canvas{display:block;margin-top:6px;width:100%;height:32px}
+
+  #rec-badge{position:absolute;top:14px;right:14px;z-index:7000;padding:6px 10px;border-radius:8px;
+    font:12px ui-monospace,monospace;background:rgba(127,29,29,.88);border:1px solid #ef4444}
+  #rec-badge[hidden]{display:none}
+  #audio-hint{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:7000;padding:9px 15px;
+    border-radius:999px;background:rgba(10,10,14,.85);border:1px solid var(--accent);font-size:13px;cursor:pointer;color:var(--accent)}
+  #audio-hint[hidden]{display:none}
+  #capture-warn{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:7100;padding:6px 13px;
+    border-radius:0 0 8px 8px;font-size:12px;background:#7c2d12;color:#fed7aa;border:1px solid #c2410c;border-top:0}
+  #capture-warn[hidden]{display:none}
+
+  /* ---------- online match ---------- */
+  body.inmatch .nav{display:none}
+  body.inmatch{overflow:hidden}
+  #online-match{position:fixed;inset:0;z-index:4000;background:#000;display:none}
+  #online-match.on{display:block}
+  #online-frame-wrap{position:absolute;inset:0;overflow:hidden}
+  #game-online{width:100%;height:100%;border:0;display:block}
+
+  #m-timer{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6000;
+    font:800 26px/1 ui-monospace,Menlo,monospace;padding:9px 20px;border-radius:12px;
+    background:rgba(10,10,14,.82);border:1px solid var(--line);backdrop-filter:blur(8px);
+    font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  #m-timer.low{color:#f87171;border-color:#ef4444;animation:pulse 1s infinite}
+  #m-phase{position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:6000;font-size:12.5px;
+    color:var(--muted);padding:3px 10px;border-radius:999px;background:rgba(10,10,14,.6)}
+
+  /* panel intentionally bottom-LEFT so the game's top-right score stays visible */
+  #m-panel{position:absolute;left:14px;bottom:14px;z-index:6000;width:320px;max-width:calc(100vw - 28px);
+    padding:14px;border-radius:12px;background:rgba(12,12,18,.92);border:1px solid var(--line);
+    backdrop-filter:blur(12px);box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  #m-panel h3{font-size:14px;margin-bottom:8px}
+  #m-panel .opp{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:10px}
+  #m-panel .opp .nm{font-weight:700;font-size:13.5px}
+  #m-panel .opp .st{font-size:11.5px;color:var(--muted)}
+  #m-panel .badge{font-size:11px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.1);color:var(--muted)}
+  #m-panel .badge.ok{background:rgba(34,197,94,.18);color:#4ade80}
+  #m-panel input[type=number]{margin-bottom:8px}
+  #m-panel .clip{margin-top:10px}
+  #m-panel .clip canvas{width:100%;border-radius:8px;border:1px solid var(--line);display:block;background:#000}
+  #m-panel .clip .cap{font-size:11px;color:var(--muted);margin-bottom:5px}
+  #m-result-big{font-size:30px;font-weight:900;letter-spacing:-.03em;margin:2px 0 6px}
+  #m-result-big.win{color:#4ade80}#m-result-big.lose{color:#f87171}#m-result-big.draw{color:#fbbf24}
+  .scoreline{display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0}
+  .scoreline b{font-variant-numeric:tabular-nums}
+
+  #m-toolbar{position:absolute;bottom:14px;right:14px;z-index:6000;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:46vw}
+  #m-toolbar button{padding:8px 11px;border-radius:9px;cursor:pointer;font:13px system-ui,sans-serif;
+    background:rgba(15,15,20,.8);color:#e8e8ea;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px)}
+  #m-toolbar button:hover{border-color:rgba(255,255,255,.45)}
+  #m-toolbar button.on{background:color-mix(in srgb,var(--accent) 70%,#000);border-color:var(--accent);color:#160f04}
+
+  .queue-list{margin-top:12px;font-size:13px}
+  .queue-list .q{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .queue-list .q:last-child{border-bottom:0}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;
+    background:rgba(255,255,255,.07);border:1px solid var(--line)}
+  .pill .live{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:pulse 1.4s infinite}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:9999;padding:11px 18px;
+    border-radius:11px;background:#1e1e28;border:1px solid var(--line);font-size:14px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#/"><span class="dot"></span>Amber</a>
+  <nav class="links">
+    <a href="#/play"     data-nav="play">Play</a>
+    <a href="#/online"   data-nav="online">Online</a>
+    <a href="#/rankings" data-nav="rankings">Rankings</a>
+    <a href="#/profile"  data-nav="profile">Profile</a>
+    <a href="#/settings" data-nav="settings">Settings</a>
+  </nav>
+  <div class="nav-right" id="nav-user"></div>
+</header>
+
+<main id="app">
+
+  <section class="view" data-view="home">
+    <div class="hero">
+      <h1>Amber</h1>
+      <p class="tag">Ranked Subway Surfers</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#/play">▶ Play now</a>
+        <a class="btn" href="#/online">🌐 Online match</a>
+        <a class="btn" href="#/rankings">🏆 Rankings</a>
+      </div>
+    </div>
+    <div class="grid3" id="home-stats"></div>
+    <div class="card">
+      <div class="card-head"><h2>Top 5</h2><a class="btn sm ghost" href="#/rankings">View all</a></div>
+      <div id="home-top"></div>
+    </div>
+  </section>
+
+  <section class="view" data-view="play">
+    <div id="frame-wrap">
+      <iframe id="game" allowfullscreen data-src="https://g.igroutka.ru/games/164/FsiVaUgCZThGj35Y/13/subway_surfers_mexico/"></iframe>
+      <div id="capture-layer" tabindex="0" hidden></div>
+    </div>
+    <div id="hud" hidden>
+      <div class="l"><span class="k">fps</span><span id="s-fps">–</span></div>
+      <div class="l"><span class="k">avg / min</span><span id="s-fps2">– / –</span></div>
+      <canvas id="fps-graph" width="230" height="32"></canvas>
+      <div class="l" style="margin-top:6px"><span class="k">session</span><span id="s-time">0:00</span></div>
+      <div class="l"><span class="k">keys</span><span id="s-keys">0</span></div>
+      <div class="l"><span class="k">clicks</span><span id="s-clicks">0</span></div>
+      <div class="l"><span class="k">mouse</span><span id="s-dist">0 px</span></div>
+    </div>
+    <div id="rec-badge" hidden>● REC <span id="rec-time">0:00</span></div>
+    <div id="capture-warn" hidden>Capture mode ON — game won't receive input</div>
+    <div id="audio-hint" hidden>🔊 Tap to enable music</div>
+    <div class="play-toolbar">
+      <button id="btn-hud" title="Toggle telemetry HUD">📊</button>
+      <button id="btn-music" title="Music">🔇</button>
+      <button id="btn-stretch" title="Stretched resolution">⤢</button>
+      <button id="btn-capture" title="Capture input over game">🎯</button>
+      <button id="rec-btn" title="Record this tab">⏺</button>
+      <button id="btn-exit" title="Back to menu">✕</button>
+    </div>
+  </section>
+
+  <section class="view" data-view="online">
+    <div class="card">
+      <div class="card-head">
+        <h2>🌐 Online Match</h2>
+        <span class="pill" id="net-status"><span class="live"></span><span id="net-status-t">lobby</span></span>
+      </div>
+      <p class="muted" style="font-size:13.5px;margin:0 0 6px">
+        <b>5:00</b> on the clock. Highest score wins. <b>Coins are ignored</b> — only the score number counts.
+      </p>
+      <p class="muted" style="font-size:12.5px;margin:0 0 16px">
+        Opponents are other <b>tabs of this same browser</b> (open this page twice and queue in both), or a bot
+        if nobody shows up. Scores are typed in manually — the game runs in a cross-origin iframe, so the page
+        can't read them. Enable screen capture to get a real screenshot clip of the game's top-right score.
+      </p>
+      <div id="lobby-body"></div>
+    </div>
+  </section>
+
+  <section class="view" data-view="rankings">
+    <div class="card">
+      <div class="card-head"><h2>🏆 Leaderboard</h2><span class="muted" id="lb-count" style="font-size:13px"></span></div>
+      <div id="lb-rows"></div>
+    </div>
+    <div class="card" id="submit-card"></div>
+  </section>
+
+  <section class="view" data-view="profile"><div id="profile-body"></div></section>
+  <section class="view" data-view="settings"><div id="settings-body"></div></section>
+  <section class="view" data-view="auth"><div id="auth-body"></div></section>
+
+</main>
+
+<!-- ================= ONLINE MATCH OVERLAY ================= -->
+<div id="online-match">
+  <div id="online-frame-wrap">
+    <iframe id="game-online" allowfullscreen data-src="https://g.igroutka.ru/games/164/FsiVaUgCZThGj35Y/13/subway_surfers_mexico/"></iframe>
+  </div>
+  <div id="m-timer">5:00</div>
+  <div id="m-phase">starting…</div>
+  <div id="m-panel"></div>
+  <div id="m-toolbar">
+    <button id="m-capture" title="Start screen capture (needed to clip your score)">🎥</button>
+    <button id="m-music" title="Music">🔇</button>
+    <button id="m-stretch" title="Stretched resolution">⤢</button>
+    <button id="m-forfeit" title="Forfeit and leave">✕</button>
+  </div>
+</div>
+
+<video id="cap-video" autoplay muted playsinline style="display:none"></video>
+<audio id="bg-music" src="music/fmg.mp3" loop preload="auto"></audio>
+<div id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================
+   0. Utilities
+============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtNum  = n => Number(n).toLocaleString('en-US');
+const fmtTime = ms => { const s = Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
+const randHex = (n) => [...crypto.getRandomValues(new Uint8Array(n))].map(b=>b.toString(16).padStart(2,'0')).join('');
+let toastTimer;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ============================================================
+   1. Storage
+============================================================ */
+const K = { users:'amber.users', session:'amber.session', scores:'amber.scores', settings:'amber.settings', seeded:'amber.seeded' };
+const DB = {
+  get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return (v===null||v===undefined)?d:v; }catch{ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{ toast('Storage full — try a smaller profile picture'); } }
+};
+
+const DEFAULT_SETTINGS = { musicDefault:true, musicVolume:0.5, stretched:false, hudDefault:false, accent:'#f59e0b', showDemo:true };
+let settings = Object.assign({}, DEFAULT_SETTINGS, DB.get(K.settings, {}));
+function saveSettings(){ DB.set(K.settings, settings); applySettings(); }
+function applySettings(){
+  document.documentElement.style.setProperty('--accent', settings.accent);
+  document.body.classList.toggle('stretched', settings.stretched);
+  music.volume = settings.musicVolume;
+  applyStretch();
+  const sb=$('#m-stretch'); if(sb) sb.classList.toggle('on', settings.stretched);
+  const pb=$('#btn-stretch'); if(pb) pb.classList.toggle('on', settings.stretched);
+}
+
+/* ============================================================
+   2. Accounts
+============================================================ */
+const users = () => DB.get(K.users, {});
+const saveUsers = (u) => DB.set(K.users, u);
+let currentUserId = DB.get(K.session, null);
+const currentUser = () => users()[currentUserId] || null;
+function setSession(id){ currentUserId = id; DB.set(K.session, id); renderNav(); }
+
+async function hashPassword(pw, salt){
+  const bytes = new TextEncoder().encode(salt + '::' + pw);
+  if (window.crypto && crypto.subtle) {
+    try{
+      const buf = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch{}
+  }
+  let h = 0x811c9dc5;
+  for (const b of bytes){ h ^= b; h = Math.imul(h, 0x01000193) >>> 0; }
+  return 'fnv_' + h.toString(16);
+}
+
+async function signup(username, password){
+  const name = username.trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) throw new Error('Username: 3–20 letters, numbers or underscores.');
+  if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+  const all = users();
+  if (Object.values(all).some(u => u.username.toLowerCase() === name.toLowerCase()))
+    throw new Error('That username is already taken.');
+  const salt = randHex(8);
+  const id = 'u_' + Date.now().toString(36) + randHex(3);
+  all[id] = { id, username:name, salt, hash: await hashPassword(password, salt),
+    pfpEmoji:'🎮', pfpColor:'#b45309', pfpImage:'', desc:'', status:'Ready to run', createdAt:Date.now() };
+  saveUsers(all);
+  setSession(id);
+  return all[id];
+}
+async function login(username, password){
+  const u = Object.values(users()).find(x => x.username.toLowerCase() === username.trim().toLowerCase());
+  if (!u) throw new Error('No account with that username.');
+  if (await hashPassword(password, u.salt) !== u.hash) throw new Error('Incorrect password.');
+  setSession(u.id);
+  return u;
+}
+function logout(){ setSession(null); toast('Signed out'); location.hash = '#/'; }
+
+function avatarHTML(user, size = 36){
+  if (!user) return `<span class="avatar" style="--s:${size}px;background:#2a2a35">👤</span>`;
+  if (user.pfpImage) return `<img class="avatar" style="--s:${size}px" src="${user.pfpImage}" alt="">`;
+  return `<span class="avatar" style="--s:${size}px;background:${esc(user.pfpColor||'#b45309')}">${esc(user.pfpEmoji||'🎮')}</span>`;
+}
+function pfpHTML(pfp, size = 34){
+  if (!pfp) return `<span class="avatar" style="--s:${size}px;background:#2a2a35">👤</span>`;
+  if (pfp.image) return `<img class="avatar" style="--s:${size}px" src="${pfp.image}" alt="">`;
+  return `<span class="avatar" style="--s:${size}px;background:${esc(pfp.color||'#b45309')}">${esc(pfp.emoji||'🎮')}</span>`;
+}
+
+/* ============================================================
+   3. Leaderboard
+============================================================ */
+function leaderboardRows(){
+  const all = DB.get(K.scores, []);
+  const allUsers = users();
+  const best = new Map();
+  for (const s of all){
+    if (s.demo && !settings.showDemo) continue;
+    const cur = best.get(s.userId);
+    if (!cur || s.score > cur.score) best.set(s.userId, s);
+  }
+  return [...best.values()].map(s => {
+    const u = allUsers[s.userId];
+    return { userId:s.userId, demo:!!s.demo, online:!!s.online, score:s.score, at:s.at,
+      name: u ? u.username : (s.name || 'Unknown'),
+      status: u ? (u.status || '') : (s.status || ''),
+      avatar: u || { pfpEmoji:s.pfpEmoji, pfpColor:s.pfpColor, pfpImage:s.pfpImage } };
+  }).sort((a,b)=> b.score - a.score);
+}
+function myRank(){ if(!currentUserId) return null; const i = leaderboardRows().findIndex(r=>r.userId===currentUserId); return i===-1?null:i+1; }
+function myBest(){ if(!currentUserId) return 0; return DB.get(K.scores,[]).filter(s=>s.userId===currentUserId).reduce((m,s)=>Math.max(m,s.score),0); }
+function submitScore(raw, extra = {}){
+  if (!currentUserId) throw new Error('Sign in to submit a score.');
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) throw new Error('Enter a valid score.');
+  const score = Math.floor(n);
+  if (score > 999_999_999) throw new Error('Score is too large.');
+  const scores = DB.get(K.scores, []);
+  scores.push({ id:'s_'+Date.now().toString(36)+randHex(2), userId:currentUserId, score, at:Date.now(), ...extra });
+  DB.set(K.scores, scores);
+  return score;
+}
+function seedDemo(){
+  if (DB.get(K.seeded,false)) return;
+  const now = Date.now();
+  const demo = [
+    ['Nova',1284910,'🦊','#b45309','Chasing sub-2 min',36],
+    ['Kai',  986540,'🐉','#0ea5e9','Grinding ranked',90],
+    ['Mira', 742300,'🌙','#a855f7','Casual runs only',8],
+    ['Zed',  512880,'⚡','#22c55e','Warming up',51],
+    ['Pip',  233140,'🐧','#64748b','Brand new here',3]
+  ];
+  const scores = DB.get(K.scores, []);
+  demo.forEach(([name,score,pfpEmoji,pfpColor,status,hoursAgo],i)=>{
+    scores.push({ id:'demo_'+i, userId:'demo_'+i, name, score, pfpEmoji, pfpColor, status, at:now-hoursAgo*3600e3, demo:true });
+  });
+  DB.set(K.scores, scores); DB.set(K.seeded, true);
+}
+seedDemo();
+
+/* ============================================================
+   4. Music
+============================================================ */
+const music = $('#bg-music');
+let musicUserPaused = false;
+function updateMusicBtn(){
+  const playing = !music.paused;
+  const b = $('#btn-music'); if (b){ b.textContent = playing ? '🔊' : '🔇'; b.classList.toggle('on', playing); }
+  const mb = $('#m-music'); if (mb){ mb.textContent = playing ? '🔊' : '🔇'; mb.classList.toggle('on', playing); }
+}
+function tryStartMusic(){
+  if (musicUserPaused) return;
+  music.play().then(()=>{ const h=$('#audio-hint'); if(h) h.hidden=true; updateMusicBtn(); })
+              .catch(()=>{ const h=$('#audio-hint'); if(h) h.hidden=false; updateMusicBtn(); });
+}
+function toggleMusic(){
+  if (music.paused){ musicUserPaused=false; music.play().catch(()=>{}); }
+  else { musicUserPaused=true; music.pause(); }
+  updateMusicBtn();
+}
+music.addEventListener('play', updateMusicBtn);
+music.addEventListener('pause', updateMusicBtn);
+
+/* ============================================================
+   5. Net: cross-tab matchmaking via localStorage
+============================================================ */
+const NET = {
+  QKEY:'amber.net.queue',
+  MKEY:'amber.net.match',
+  STALE: 6000,
+  POLL: 800,
+  MATCH_MS: 5 * 60 * 1000,
+  START_DELAY: 3000
+};
+const tabId = (() => {
+  let id = sessionStorage.getItem('amber.tabId');
+  if (!id){ id = 't_' + randHex(6); sessionStorage.setItem('amber.tabId', id); }
+  return id;
+})();
+
+let queued = false, queueStartedAt = 0;
+let activeMatchId = null, myMatch = null, matchPhase = 'idle';
+let netTimer = null, matchTimer = null;
+let capStream = null, clipTimer = null;
+let draftScore = '';
+
+const meEntry = () => {
+  const u = currentUser();
+  return { tabId, userId:u.id, name:u.username,
+           pfp:{ emoji:u.pfpEmoji, color:u.pfpColor, image:u.pfpImage } };
+};
+
+function readQueue(){ return DB.get(NET.QKEY, {}); }
+function readMatches(){ return DB.get(NET.MKEY, {}); }
+function writeQueue(q){ DB.set(NET.QKEY, q); }
+function writeMatches(m){ DB.set(NET.MKEY, m); }
+
+function onlineActive(){ return route() === 'online' || matchPhase !== 'idle'; }
+
+function netPoll(){
+  if (!onlineActive()) return;
+  const now = Date.now();
+  let q = readQueue(), ms = readMatches();
+  let qDirty = false, mDirty = false;
+
+  for (const [id,e] of Object.entries(q)){
+    if (now - e.lastSeen > NET.STALE){ delete q[id]; qDirty = true; }
+  }
+  for (const [id,m] of Object.entries(ms)){
+    if (id !== activeMatchId && now - m.createdAt > 900000){ delete ms[id]; mDirty = true; }
+  }
+  if (qDirty) writeQueue(q);
+  if (mDirty) writeMatches(ms);
+
+  if (activeMatchId){
+    if (ms[activeMatchId]) syncMatch(ms[activeMatchId]);
+    else { toast('Match record was removed'); endMatch(); }
+    return;
+  }
+
+  if (!queued || !currentUser()) { if (queued) renderLobby(); return; }
+
+  q[tabId] = { ...meEntry(), joinedAt: q[tabId]?.joinedAt || now, lastSeen: now };
+  const others = Object.values(q).filter(e => e.tabId !== tabId);
+
+  if (others.length){
+    const opp = others.sort((a,b)=> a.joinedAt - b.joinedAt)[0];
+
+    const existing = Object.values(ms).find(m =>
+      m.players[tabId] && m.players[opp.tabId] && now - m.createdAt < 60000 && m.status !== 'done');
+    if (existing){
+      delete q[tabId]; delete q[opp.tabId]; writeQueue(q);
+      queued = false;
+      joinMatch(existing.id, existing);
+      return;
+    }
+
+    const iCreate = tabId < opp.tabId;
+    const waited = now - (queueStartedAt || now);
+    if (iCreate || waited > 2500){
+      const m = makeMatch(opp, now);
+      ms[m.id] = m; writeMatches(ms);
+      delete q[tabId]; delete q[opp.tabId]; writeQueue(q);
+      queued = false;
+      joinMatch(m.id, m);
+      return;
+    }
+  }
+  writeQueue(q);
+  renderLobby();
+}
+
+function makeMatch(opp, now){
+  const bot = !!opp.bot;
+  const p2 = bot
+    ? { tabId: opp.tabId, userId:'bot', name: opp.name, pfp: opp.pfp }
+    : { tabId: opp.tabId, userId: opp.userId, name: opp.name, pfp: opp.pfp };
+  return {
+    id: 'm_' + now.toString(36) + randHex(3),
+    createdAt: now,
+    startsAt: now + NET.START_DELAY,
+    endsAt: now + NET.START_DELAY + NET.MATCH_MS,
+    status: 'live',
+    bot,
+    botScore: bot ? (20000 + Math.floor(Math.random() * 700000)) : 0,
+    players: { [tabId]: meEntry(), [p2.tabId]: p2 },
+    scores: {}, done: {}, winner: null, added: false
+  };
+}
+
+function updateMatch(mutator){
+  const ms = readMatches();
+  const m = ms[activeMatchId];
+  if (!m) return null;
+  mutator(m);
+  ms[activeMatchId] = m;
+  writeMatches(ms);
+  myMatch = m;
+  return m;
+}
+
+function joinMatch(id, m){
+  activeMatchId = id;
+  myMatch = m || readMatches()[id];
+  if (!myMatch){ toast('Match not found'); return; }
+  matchPhase = 'live';
+  draftScore = '';
+  document.body.classList.add('inmatch');
+  $('#online-match').classList.add('on');
+  loadOnlineGame();
+  if (settings.musicDefault) tryStartMusic();
+  renderMatchPanel();
+  startMatchTicker();
+  if (netTimer) clearInterval(netTimer);
+  netTimer = setInterval(netPoll, NET.POLL);
+  renderLobby();
+}
+
+function opponentOf(m){
+  return Object.values(m.players).find(p => p.tabId !== tabId) || null;
+}
+
+function syncMatch(m){
+  myMatch = m;
+  renderMatchPanel();
+  if (matchPhase === 'submit' || matchPhase === 'result') checkBothDone();
+}
+
+function startMatchTicker(){
+  if (matchTimer) clearInterval(matchTimer);
+  matchTimer = setInterval(() => {
+    if (!myMatch) return;
+    const remain = myMatch.endsAt - Date.now();
+    const t = $('#m-timer');
+    t.textContent = fmtTime(Math.max(0, remain));
+    t.classList.toggle('low', remain <= 30000);
+
+    if (matchPhase === 'live'){
+      if (Date.now() < myMatch.startsAt) $('#m-phase').textContent = 'get ready…';
+      else $('#m-phase').textContent = 'match in progress — play the game';
+      if (remain <= 0) enterSubmit();
+    }
+  }, 250);
+}
+
+function enterSubmit(){
+  if (matchPhase !== 'live') return;
+  matchPhase = 'submit';
+  $('#m-phase').textContent = 'time up — enter your final score';
+  if (myMatch.bot){
+    updateMatch(m => {
+      const botId = Object.keys(m.players).find(t => t !== tabId);
+      if (botId && m.scores[botId] === undefined){
+        m.scores[botId] = m.botScore;
+        m.done[botId] = true;
+      }
+    });
+  }
+  renderMatchPanel();
+  if (capStream) startClipPreview();
+}
+
+function submitFinal(){
+  const raw = $('#m-final')?.value;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0){ toast('Enter a valid score'); return; }
+  updateMatch(m => { m.scores[tabId] = Math.floor(n); m.done[tabId] = true; });
+  toast('Score submitted');
+  renderMatchPanel();
+  checkBothDone();
+}
+
+function checkBothDone(){
+  const ms = readMatches();
+  const m = ms[activeMatchId];
+  if (!m) return;
+  const ids = Object.keys(m.players);
+  const allDone = ids.every(id => m.done[id]);
+  if (!allDone || matchPhase === 'result') return;
+
+  const myScore = m.scores[tabId] ?? 0;
+  const oppId = ids.find(i => i !== tabId);
+  const oppScore = m.scores[oppId] ?? 0;
+  const winner = myScore > oppScore ? tabId : oppScore > myScore ? oppId : 'draw';
+
+  updateMatch(x => { x.status = 'done'; x.winner = winner; x.finishedAt = Date.now(); });
+  matchPhase = 'result';
+  $('#m-phase').textContent = 'match complete';
+
+  if (!m.added && currentUserId){
+    try { submitScore(myScore, { online:true, matchId:m.id }); } catch {}
+    updateMatch(x => { x.added = true; });
+  }
+  renderMatchPanel();
+  renderLobby();
+}
+
+function forfeitMatch(){
+  if (!myMatch) { endMatch(); return; }
+  if (!confirm('Leave this match? Your score will be lost.')) return;
+  endMatch();
+}
+
+function endMatch(){
+  if (activeMatchId){
+    const ms = readMatches();
+    if (ms[activeMatchId] && ms[activeMatchId].status !== 'done') delete ms[activeMatchId];
+    writeMatches(ms);
+  }
+  activeMatchId = null; myMatch = null; matchPhase = 'idle';
+  document.body.classList.remove('inmatch');
+  $('#online-match').classList.remove('on');
+  if (matchTimer) clearInterval(matchTimer);
+  stopClipPreview();
+  unloadOnlineGame();
+  if (netTimer) clearInterval(netTimer);
+  netTimer = null;
+  if (onlineActive()) { netTimer = setInterval(netPoll, NET.POLL); }
+  renderLobby();
+}
+
+function joinQueue(){
+  if (!currentUser()){ toast('Sign in to play online'); location.hash = '#/auth'; return; }
+  queued = true; queueStartedAt = Date.now();
+  const q = readQueue();
+  q[tabId] = { ...meEntry(), joinedAt: Date.now(), lastSeen: Date.now() };
+  writeQueue(q);
+  if (!netTimer) netTimer = setInterval(netPoll, NET.POLL);
+  renderLobby();
+}
+function leaveQueue(){
+  queued = false;
+  const q = readQueue();
+  if (q[tabId]){ delete q[tabId]; writeQueue(q); }
+  renderLobby();
+}
+function startBotMatch(){
+  if (!currentUser()){ toast('Sign in first'); location.hash = '#/auth'; return; }
+  const names = ['Nova','Kai','Mira','Zed','Pip','Rook','Vex','Juno'];
+  const emojis = ['🦊','🐉','🌙','⚡','🐧','👾','🚀','💎'];
+  const i = Math.floor(Math.random()*names.length);
+  const bot = { bot:true, tabId:'bot_'+randHex(3), name: names[i]+' (bot)',
+                pfp:{ emoji:emojis[i], color:'#475569', image:'' } };
+  const now = Date.now();
+  const m = makeMatch(bot, now);
+  const ms = readMatches(); ms[m.id] = m; writeMatches(ms);
+  leaveQueue();
+  joinMatch(m.id, m);
+}
+
+/* ============================================================
+   6. Online match UI
+============================================================ */
+function renderLobby(){
+  const el = $('#lobby-body'); if (!el) return;
+  const u = currentUser();
+  const q = readQueue();
+  const others = Object.values(q).filter(e => e.tabId !== tabId);
+  const elapsed = queued ? Math.floor((Date.now() - queueStartedAt)/1000) : 0;
+
+  $('#net-status-t').textContent = queued ? 'searching' : (activeMatchId ? 'in match' : 'lobby');
+
+  if (!u){
+    el.innerHTML = `<a class="btn primary" href="#/auth">Sign in to play online</a>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      ${queued
+        ? `<button class="btn danger" id="lobby-cancel">Cancel search (${elapsed}s)</button>`
+        : `<button class="btn primary" id="lobby-queue">🔍 Find match</button>`}
+      <button class="btn" id="lobby-bot">🤖 Play vs bot</button>
+      ${activeMatchId ? `<button class="btn" id="lobby-back">↩ Back to match</button>` : ''}
+    </div>
+    ${queued && elapsed >= 20 ? `<p class="muted" style="font-size:12.5px;margin:12px 0 0">
+       Nobody else is queued. Open this page in a second tab and queue there — or play a bot.</p>` : ''}
+    <div class="queue-list">
+      ${others.length
+        ? others.map(o=>`<div class="q">${pfpHTML(o.pfp,28)}
+            <span style="font-weight:600">${esc(o.name)}</span>
+            <span class="muted" style="font-size:12px;margin-left:auto">waiting ${Math.floor((Date.now()-o.joinedAt)/1000)}s</span>
+          </div>`).join('')
+        : `<p class="muted" style="font-size:12.5px;margin:10px 0 0">No one else queued on this browser right now.</p>`}
+    </div>
+  `;
+  const qb = $('#lobby-queue'); if (qb) qb.onclick = joinQueue;
+  const cb = $('#lobby-cancel'); if (cb) cb.onclick = () => { leaveQueue(); renderLobby(); };
+  $('#lobby-bot').onclick = startBotMatch;
+  const bb = $('#lobby-back'); if (bb) bb.onclick = () => { $('#online-match').classList.add('on'); document.body.classList.add('inmatch'); };
+}
+
+function renderMatchPanel(){
+  const p = $('#m-panel'); if (!p || !myMatch) return;
+  const m = myMatch;
+  const opp = opponentOf(m);
+  const myScore = m.scores[tabId];
+  const oppScore = opp ? m.scores[opp.tabId] : undefined;
+  const oppDone = opp ? !!m.done[opp.tabId] : false;
+
+  const oppBlock = opp ? `
+    <div class="opp">
+      ${pfpHTML(opp.pfp, 30)}
+      <div style="flex:1;min-width:0">
+        <div class="nm">${esc(opp.name)}</div>
+        <div class="st">${m.bot ? 'bot opponent' : 'opponent'}</div>
+      </div>
+      <span class="badge ${oppDone ? 'ok' : ''}">${oppDone ? 'submitted' : 'playing'}</span>
+    </div>` : '';
+
+  if (matchPhase === 'live'){
+    p.innerHTML = `
+      <h3>Your score</h3>
+      ${oppBlock}
+      <input type="number" id="m-live" min="0" step="1" placeholder="type your current score"
+             value="${esc(draftScore)}">
+      <div class="muted" style="font-size:11.5px">
+        The game's score is in the top-right of the game. Copy it here as you go —
+        it's what gets submitted at 0:00. Coins don't count.
+      </div>`;
+    $('#m-live').oninput = e => { draftScore = e.target.value; };
+    return;
+  }
+
+  if (matchPhase === 'submit'){
+    p.innerHTML = `
+      <h3>⏱ Time up</h3>
+      ${oppBlock}
+      <input type="number" id="m-final" min="0" step="1" placeholder="final score" value="${esc(draftScore)}">
+      <button class="btn primary sm" id="m-submit" style="width:100%;justify-content:center">Submit final score</button>
+      <div class="clip">
+        <div class="cap">${capStream ? 'top-right clip — read the score and type it above' : 'no capture running'}</div>
+        ${capStream ? `<canvas id="clip-canvas"></canvas>`
+                    : `<button class="btn sm ghost" id="m-startcap" style="width:100%;justify-content:center">🎥 Start capture to clip score</button>`}
+      </div>`;
+    $('#m-submit').onclick = submitFinal;
+    $('#m-final').onkeydown = e => { if (e.key === 'Enter') submitFinal(); };
+    const sc = $('#m-startcap');
+    if (sc) sc.onclick = async () => { if (await startCapture()){ startClipPreview(); renderMatchPanel(); } };
+    if (capStream) startClipPreview();
+    return;
+  }
+
+  if (matchPhase === 'result'){
+    const oppId = opp ? opp.tabId : null;
+    const my = m.scores[tabId] ?? 0;
+    const their = oppId ? (m.scores[oppId] ?? 0) : 0;
+    const win = m.winner === tabId, draw = m.winner === 'draw';
+    p.innerHTML = `
+      <div id="m-result-big" class="${win?'win':draw?'draw':'lose'}">${win?'VICTORY':draw?'DRAW':'DEFEAT'}</div>
+      ${oppBlock}
+      <div class="scoreline"><span>You</span><b>${fmtNum(my)}</b></div>
+      <div class="scoreline"><span>${esc(opp?opp.name:'Opponent')}</span><b>${fmtNum(their)}</b></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn primary sm" id="m-again" style="flex:1;justify-content:center">Play again</button>
+        <button class="btn sm" id="m-done" style="flex:1;justify-content:center">Leave</button>
+      </div>`;
+    $('#m-done').onclick = () => { endMatch(); location.hash = '#/rankings'; };
+    $('#m-again').onclick = () => { endMatch(); joinQueue(); };
+    return;
+  }
+}
+
+/* ============================================================
+   7. Screen capture + score clip (top-right crop)
+============================================================ */
+async function startCapture(){
+  if (capStream) return true;
+  if (!navigator.mediaDevices?.getDisplayMedia){ toast('Screen capture unsupported'); return false; }
+  try{
+    capStream = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:30 }, audio:true });
+  }catch{ toast('Capture cancelled'); return false; }
+  const v = $('#cap-video');
+  v.srcObject = capStream;
+  await v.play().catch(()=>{});
+  capStream.getVideoTracks()[0].addEventListener('ended', () => { stopClipPreview(); capStream = null; });
+  toast('Capturing — pick "This tab" for a clean clip');
+  return true;
+}
+function drawClip(){
+  const v = $('#cap-video'), cv = $('#clip-canvas');
+  if (!v || !cv || !v.videoWidth) return;
+  const sw = v.videoWidth * 0.42, sh = v.videoHeight * 0.13;
+  const sx = v.videoWidth - sw, sy = 0;
+  cv.width = Math.round(sw * 1.8);
+  cv.height = Math.round(sh * 1.8);
+  cv.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+}
+function startClipPreview(){
+  stopClipPreview();
+  drawClip();
+  clipTimer = setInterval(drawClip, 500);
+}
+function stopClipPreview(){
+  if (clipTimer){ clearInterval(clipTimer); clipTimer = null; }
+}
+
+/* ============================================================
+   8. Play view: iframes, stretch, telemetry, recorder
+============================================================ */
+const game = $('#game');
+const ogame = $('#game-online');
+let gameLoaded = false, ogameLoaded = false;
+
+function loadPlayGame(){ if (!gameLoaded){ game.src = game.dataset.src; gameLoaded = true; } }
+function unloadPlayGame(){ if (gameLoaded){ game.src = 'about:blank'; gameLoaded = false; } }
+function loadOnlineGame(){ if (!ogameLoaded){ ogame.src = ogame.dataset.src; ogameLoaded = true; } }
+function unloadOnlineGame(){ if (ogameLoaded){ ogame.src = 'about:blank'; ogameLoaded = false; } }
+
+function applyStretch(){
+  [['#frame-wrap','#game'], ['#online-frame-wrap','#game-online']].forEach(([w,g]) => {
+    const wrap = $(w), el = $(g);
+    if (!wrap || !el) return;
+    if (!settings.stretched){ el.style.transform = ''; return; }
+    if (!wrap.clientWidth) return;
+    const sx = wrap.clientWidth / 1024, sy = wrap.clientHeight / 768;
+    el.style.transform = `translate(-50%,-50%) scale(${sx},${sy})`;
+  });
+}
+addEventListener('resize', applyStretch);
+
+$('#btn-stretch').onclick = (e) => { e.stopPropagation(); settings.stretched = !settings.stretched; saveSettings();
+  toast(settings.stretched ? 'Stretched ON' : 'Stretched OFF'); };
+$('#m-stretch').onclick = (e) => { e.stopPropagation(); settings.stretched = !settings.stretched; saveSettings(); };
+
+$('#btn-hud').onclick = (e) => { e.stopPropagation();
+  const h = $('#hud'); h.hidden = !h.hidden; $('#btn-hud').classList.toggle('on', !h.hidden); };
+
+$('#btn-capture').onclick = (e) => { e.stopPropagation();
+  const layer = $('#capture-layer'), on = layer.hidden;
+  layer.hidden = !on; $('#capture-warn').hidden = !on;
+  $('#btn-capture').classList.toggle('on', on);
+  if (on) layer.focus(); };
+
+$('#btn-exit').onclick = (e) => { e.stopPropagation(); location.hash = '#/'; };
+$('#btn-music').onclick = (e) => { e.stopPropagation(); toggleMusic(); };
+$('#m-music').onclick = (e) => { e.stopPropagation(); toggleMusic(); };
+$('#m-forfeit').onclick = (e) => { e.stopPropagation(); forfeitMatch(); };
+$('#m-capture').onclick = async (e) => { e.stopPropagation(); await startCapture();
+  $('#m-capture').classList.toggle('on', !!capStream); };
+
+/* ---------- telemetry ---------- */
+const tel = { keys:0, clicks:0, mouseDist:0, frames:0, startedAt: performance.now() };
+let lastPt = null, fps = 0, framesWin = 0, winStart = performance.now(), minFps = Infinity;
+const fpsSamples = [];
+const gctx = $('#fps-graph').getContext('2d');
+
+addEventListener('keydown', (e) => { if (!e.repeat) tel.keys++; }, true);
+addEventListener('pointerdown', (e) => { if (e.target.closest?.('.play-toolbar, #hud, #m-panel, #m-toolbar')) return; tel.clicks++; }, true);
+addEventListener('mousemove', (e) => {
+  if (lastPt) tel.mouseDist += Math.hypot(e.clientX - lastPt.x, e.clientY - lastPt.y);
+  lastPt = { x:e.clientX, y:e.clientY };
+}, { passive:true });
+
+function drawFpsGraph(){
+  const w = $('#fps-graph').width, h = $('#fps-graph').height;
+  gctx.clearRect(0, 0, w, h);
+  if (!fpsSamples.length) return;
+  const max = Math.max(60, ...fpsSamples), bw = w / 60;
+  fpsSamples.forEach((v, i) => {
+    const bh = Math.max(1, (v / max) * (h - 2));
+    gctx.fillStyle = v >= 50 ? '#4ade80' : v >= 30 ? '#fbbf24' : '#f87171';
+    gctx.fillRect(i * bw, h - bh, Math.max(1, bw - 1), bh);
+  });
+}
+function frameLoop(now){
+  tel.frames++; framesWin++;
+  const dt = now - winStart;
+  if (dt >= 1000){
+    fps = Math.round(framesWin * 1000 / dt);
+    framesWin = 0; winStart = now;
+    fpsSamples.push(fps); if (fpsSamples.length > 60) fpsSamples.shift();
+    if (document.visibilityState === 'visible' && fps < minFps) minFps = fps;
+    drawFpsGraph();
+  }
+  requestAnimationFrame(frameLoop);
+}
+requestAnimationFrame(frameLoop);
+
+setInterval(() => {
+  if ($('#hud').hidden) return;
+  const el = performance.now() - tel.startedAt;
+  $('#s-fps').textContent = fps;
+  $('#s-fps2').textContent = `${Math.round(tel.frames/(el/1000))} / ${minFps===Infinity?'–':minFps}`;
+  $('#s-time').textContent = fmtTime(el);
+  $('#s-keys').textContent = tel.keys;
+  $('#s-clicks').textContent = tel.clicks;
+  $('#s-dist').textContent = Math.round(tel.mouseDist) + ' px';
+}, 300);
+
+/* ---------- recorder (play view) ---------- */
+let recorder = null, chunks = [], recStartedAt = 0;
+$('#rec-btn').onclick = async (e) => {
+  e.stopPropagation();
+  if (recorder && recorder.state === 'recording'){ recorder.stop(); return; }
+  if (!capStream){
+    if (!await startCapture()) return;
+    $('#m-capture').classList.add('on');
+  }
+  const mime = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+    .find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+  try{
+    recorder = new MediaRecorder(capStream, mime ? { mimeType:mime, videoBitsPerSecond:8_000_000 } : undefined);
+  }catch{ toast('Recorder unavailable'); return; }
+
+  chunks = [];
+  recorder.ondataavailable = ev => { if (ev.data.size) chunks.push(ev.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `amber-${new Date().toISOString().replace(/[:.]/g,'-')}.webm`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    $('#rec-badge').hidden = true; $('#rec-btn').classList.remove('recording');
+    toast('Recording saved');
+  };
+  recorder.start(1000);
+  recStartedAt = performance.now();
+  $('#rec-badge').hidden = false;
+  $('#rec-btn').classList.add('recording');
+};
+setInterval(() => {
+  if (recorder && recorder.state === 'recording')
+    $('#rec-time').textContent = fmtTime(performance.now() - recStartedAt);
+}, 500);
+
+/* ============================================================
+   9. Router  (FIX: strip the query string before matching)
+============================================================ */
+const ROUTES = ['home','play','online','rankings','profile','settings','auth'];
+function route(){
+  const raw = location.hash.replace(/^#\/?/, '');
+  const path = raw.split('?')[0] || 'home';   // <-- the fix
+  return ROUTES.includes(path) ? path : 'home';
+}
+let prevRoute = null;
+
+function render(){
+  const r = route();
+
+  if (prevRoute === 'play' && r !== 'play'){
+    if (!music.paused) music.pause();
+    if (recorder && recorder.state === 'recording') recorder.stop();
+    unloadPlayGame();
+  }
+  if (prevRoute === 'online' && r !== 'online'){
+    leaveQueue();
+    if (!activeMatchId && capStream){ capStream.getTracks().forEach(t=>t.stop()); capStream = null; }
+    if (!activeMatchId){ if (netTimer){ clearInterval(netTimer); netTimer = null; } }
+  }
+  prevRoute = r;
+
+  document.body.classList.toggle('playing', r === 'play');
+  $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === r));
+  $$('.links a').forEach(a => a.classList.toggle('active', a.dataset.nav === r));
+  renderNav();
+
+  if (r === 'home')     renderHome();
+  if (r === 'play')     enterPlay();
+  if (r === 'online')   enterOnline();
+  if (r === 'rankings') renderRankings();
+  if (r === 'profile')  renderProfile();
+  if (r === 'settings') renderSettings();
+  if (r === 'auth')     renderAuth();
+
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', render);
+addEventListener('storage', (e) => {
+  if (e.key === NET.QKEY || e.key === NET.MKEY) netPoll();
+});
+
+function renderNav(){
+  const u = currentUser();
+  $('#nav-user').innerHTML = u
+    ? `<a href="#/profile" style="display:flex;align-items:center;gap:9px">
+         ${avatarHTML(u,30)}<span style="font-weight:700;font-size:14px">${esc(u.username)}</span></a>
+       <button class="btn sm ghost" id="nav-logout">Sign out</button>`
+    : `<a class="btn sm" href="#/auth">Sign in</a>
+       <a class="btn sm primary" href="#/auth?mode=signup">Create account</a>`;
+  const lo = $('#nav-logout'); if (lo) lo.onclick = logout;
+}
+
+/* ============================================================
+   10. Views
+============================================================ */
+function renderHome(){
+  const rows = leaderboardRows();
+  const u = currentUser();
+  const rank = myRank();
+  $('#home-stats').innerHTML = `
+    <div class="stat"><div class="k">Your best</div><div class="v">${u?fmtNum(myBest()):'—'}</div></div>
+    <div class="stat"><div class="k">Your rank</div><div class="v">${rank?'#'+rank:'—'}</div></div>
+    <div class="stat"><div class="k">Top score</div><div class="v">${rows.length?fmtNum(rows[0].score):'—'}</div></div>`;
+  $('#home-top').innerHTML = rows.length
+    ? rows.slice(0,5).map((r,i)=>lbRowHTML(r,i,false)).join('')
+    : `<p class="muted">No scores yet — be the first.</p>`;
+}
+
+function lbRowHTML(r, i, showMe){
+  const medal = i===0?'m1':i===1?'m2':i===2?'m3':'';
+  const isMe = showMe && r.userId === currentUserId;
+  return `
+    <div class="lb-row ${isMe?'me':''}">
+      <span class="rank ${medal}">#${i+1}</span>
+      ${avatarHTML(r.avatar,34)}
+      <div class="lb-who">
+        <div class="lb-name">${esc(r.name)}${r.demo?'<span class="tag-demo">demo</span>':''}${r.online?'<span class="tag-online">online</span>':''}</div>
+        ${r.status?`<div class="lb-status">${esc(r.status)}</div>`:''}
+      </div>
+      <div class="lb-score">${fmtNum(r.score)}</div>
+    </div>`;
+}
+
+function renderRankings(){
+  const rows = leaderboardRows();
+  $('#lb-count').textContent = `${rows.length} player${rows.length===1?'':'s'}`;
+  $('#lb-rows').innerHTML = rows.length ? rows.map((r,i)=>lbRowHTML(r,i,true)).join('')
+    : `<p class="muted">No scores yet.</p>`;
+
+  const u = currentUser();
+  $('#submit-card').innerHTML = u ? `
+    <div class="card-head"><h2>Submit your score</h2></div>
+    <p class="muted" style="font-size:13px;margin:0 0 12px">
+      Typed in manually — the game runs in a cross-origin iframe, so the page can't read your score.
+      Online matches submit automatically.</p>
+    <form id="score-form" style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="score-input" type="number" min="0" step="1" placeholder="e.g. 245300" required style="flex:1;min-width:180px">
+      <button class="btn primary" type="submit">Submit</button>
+    </form>
+    <div class="err" id="score-err"></div>` : `
+    <div class="card-head"><h2>Want to rank?</h2></div>
+    <p class="muted" style="margin:0 0 14px">Sign in or create an account to submit scores.</p>
+    <a class="btn primary" href="#/auth">Sign in</a>
+    <a class="btn" href="#/auth?mode=signup">Create account</a>`;
+
+  const form = $('#score-form');
+  if (form) form.onsubmit = (e) => {
+    e.preventDefault();
+    try{ const s = submitScore($('#score-input').value); toast(`Score ${fmtNum(s)} submitted`); renderRankings(); }
+    catch(err){ $('#score-err').textContent = err.message; }
+  };
+}
+
+/* ---------- profile ---------- */
+const EMOJIS = ['🎮','🦊','🐉','🌙','⚡','🐧','🔥','💎','🚀','👾','🐺','🎧'];
+const COLORS = ['#b45309','#0ea5e9','#22c55e','#a855f7','#ef4444','#14b8a6','#f43f5e','#64748b'];
+function fileToAvatar(file){
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas'); c.width = c.height = 128;
+        const ctx = c.getContext('2d');
+        const s = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 128, 128);
+        res(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = rej; img.src = fr.result;
+    };
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+
+function renderProfile(){
+  const u = currentUser();
+  if (!u){
+    $('#profile-body').innerHTML = `
+      <div class="card" style="text-align:center;padding:44px 20px">
+        <h2 style="margin-bottom:8px">You're not signed in</h2>
+        <p class="muted" style="margin:0 0 20px">Create an account to build a profile and submit scores.</p>
+        <a class="btn primary" href="#/auth?mode=signup">Create account</a>
+        <a class="btn" href="#/auth">Sign in</a>
+      </div>`;
+    return;
+  }
+  const rank = myRank(), best = myBest();
+  const subs = DB.get(K.scores, []).filter(s => s.userId === u.id).length;
+
+  $('#profile-body').innerHTML = `
+    <div class="card">
+      <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+        ${avatarHTML(u,76)}
+        <div style="flex:1;min-width:200px">
+          <h2 style="font-size:24px">${esc(u.username)}</h2>
+          <div class="muted" style="font-size:14px">${esc(u.status||'No status set')}</div>
+          ${u.desc?`<p style="margin:8px 0 0;font-size:14px">${esc(u.desc)}</p>`:''}
+        </div>
+        <div style="text-align:right">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.08em">Best</div>
+          <div style="font-size:22px;font-weight:800">${fmtNum(best)}</div>
+          <div class="muted" style="font-size:12.5px">${rank?'Rank #'+rank:'Unranked'} · ${subs} submission${subs===1?'':'s'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Edit profile</h2></div>
+      <form id="profile-form">
+        <label class="field"><span>Display name (username)</span>
+          <input type="text" id="pf-name" value="${esc(u.username)}" maxlength="20"></label>
+        <label class="field"><span>Status</span>
+          <input type="text" id="pf-status" value="${esc(u.status||'')}" maxlength="40" placeholder="e.g. Grinding ranked">
+          <div class="chips" id="status-chips">
+            ${['Grinding ranked','Chasing WR','Casual runs','Warming up','Ready to run']
+              .map(s=>`<span class="chip" data-status="${esc(s)}">${esc(s)}</span>`).join('')}
+          </div>
+        </label>
+        <label class="field"><span>Description</span>
+          <textarea id="pf-desc" maxlength="200" placeholder="Tell people about yourself">${esc(u.desc||'')}</textarea></label>
+        <label class="field"><span>Avatar emoji</span>
+          <div class="chips" id="emoji-chips">
+            ${EMOJIS.map(e=>`<span class="chip emoji" data-emoji="${e}">${e}</span>`).join('')}
+          </div></label>
+        <label class="field"><span>Avatar colour</span>
+          <div class="chips" id="color-chips">
+            ${COLORS.map(c=>`<span class="chip" data-color="${c}" style="background:${c};width:26px;height:26px;border-radius:50%;padding:0;border:2px solid ${u.pfpColor===c?'#fff':'transparent'}"></span>`).join('')}
+          </div></label>
+        <label class="field"><span>Upload profile picture</span>
+          <input type="file" id="pf-file" accept="image/*" style="font-size:13px">
+          ${u.pfpImage?`<button type="button" class="btn sm ghost" id="pf-clear" style="margin-top:8px">Remove picture</button>`:''}
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <button class="btn primary" type="submit">Save changes</button>
+          <button class="btn ghost" type="button" id="pf-reset">Reset</button>
+        </div>
+        <div class="err" id="pf-err"></div>
+      </form>
+    </div>`;
+
+  const draft = { emoji:u.pfpEmoji, color:u.pfpColor, image:u.pfpImage };
+  $$('#status-chips .chip').forEach(ch => ch.onclick = () => { $('#pf-status').value = ch.dataset.status; });
+  $$('#emoji-chips .chip').forEach(ch => ch.onclick = () => {
+    draft.emoji = ch.dataset.emoji; draft.image = '';
+    $$('#emoji-chips .chip').forEach(c=>c.style.outline=''); ch.style.outline = '2px solid var(--accent)';
+  });
+  $$('#color-chips .chip').forEach(ch => ch.onclick = () => {
+    draft.color = ch.dataset.color;
+    $$('#color-chips .chip').forEach(c=>c.style.border='2px solid transparent');
+    ch.style.border = '2px solid #fff';
+  });
+  $('#pf-file').onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try{ draft.image = await fileToAvatar(f); toast('Picture ready — hit Save'); }
+    catch{ toast('Could not read that image'); }
+  };
+  const clearBtn = $('#pf-clear');
+  if (clearBtn) clearBtn.onclick = () => { draft.image = ''; toast('Picture removed — hit Save'); };
+  $('#pf-reset').onclick = () => renderProfile();
+
+  $('#profile-form').onsubmit = (e) => {
+    e.preventDefault();
+    const errEl = $('#pf-err'); errEl.textContent = '';
+    const name = $('#pf-name').value.trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)){ errEl.textContent = 'Username: 3–20 letters, numbers or underscores.'; return; }
+    const all = users();
+    if (Object.values(all).some(x => x.id !== u.id && x.username.toLowerCase() === name.toLowerCase())){
+      errEl.textContent = 'That username is already taken.'; return;
+    }
+    const me = all[u.id];
+    me.username = name;
+    me.status = $('#pf-status').value.trim().slice(0,40);
+    me.desc = $('#pf-desc').value.trim().slice(0,200);
+    me.pfpEmoji = draft.emoji; me.pfpColor = draft.color; me.pfpImage = draft.image;
+    saveUsers(all);
+    toast('Profile updated'); renderNav(); renderProfile();
+  };
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  const u = currentUser();
+  $('#settings-body').innerHTML = `
+    <div class="card">
+      <div class="card-head"><h2>Gameplay</h2></div>
+      <div class="row"><div><div class="label">Music on by default</div>
+        <div class="hint">Start music automatically when you enter Play or a match. Browsers still need one click before audio can play.</div></div>
+        <input class="switch" type="checkbox" id="set-music" ${settings.musicDefault?'checked':''}></div>
+      <div class="row"><div><div class="label">Music volume</div>
+        <div class="hint">Game audio lives inside the iframe and can only be muted from its own menu.</div></div>
+        <input type="range" id="set-volume" min="0" max="1" step="0.05" value="${settings.musicVolume}" style="max-width:180px"></div>
+      <div class="row"><div><div class="label">Stretched resolution</div>
+        <div class="hint">Renders the game in a 4:3 box and stretches it to fill the screen — wider view, distorted pixels.</div></div>
+        <input class="switch" type="checkbox" id="set-stretch" ${settings.stretched?'checked':''}></div>
+      <div class="row"><div><div class="label">Show HUD by default</div>
+        <div class="hint">FPS, keystrokes, clicks and mouse distance in Play.</div></div>
+        <input class="switch" type="checkbox" id="set-hud" ${settings.hudDefault?'checked':''}></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Appearance &amp; leaderboard</h2></div>
+      <div class="row"><div><div class="label">Accent colour</div>
+        <div class="hint">Buttons, highlights and the homepage glow.</div></div>
+        <input type="color" id="set-accent" value="${settings.accent}"></div>
+      <div class="row"><div><div class="label">Show demo entries</div>
+        <div class="hint">The five placeholder players marked "demo".</div></div>
+        <input class="switch" type="checkbox" id="set-demo" ${settings.showDemo?'checked':''}></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Account &amp; data</h2></div>
+      <div class="row"><div><div class="label">Signed in as</div>
+        <div class="hint">${u?esc(u.username)+' — local account in this browser only':'Not signed in'}</div></div>
+        ${u?`<button class="btn sm" id="set-signout">Sign out</button>`:`<a class="btn sm" href="#/auth">Sign in</a>`}</div>
+      <div class="row"><div><div class="label">Export data</div>
+        <div class="hint">Download your account, scores and settings as JSON.</div></div>
+        <button class="btn sm" id="set-export">Export</button></div>
+      <div class="row"><div><div class="label">Import data</div>
+        <div class="hint">Merge a JSON export from another browser.</div></div>
+        <input type="file" id="set-import" accept="application/json" style="font-size:13px;max-width:200px"></div>
+      ${u?`<div class="row"><div><div class="label">Delete my scores</div>
+        <div class="hint">Removes every score you've submitted. Account stays.</div></div>
+        <button class="btn sm danger" id="set-clearscores">Delete scores</button></div>
+      <div class="row"><div><div class="label">Delete my account</div>
+        <div class="hint">Removes the account and all its scores. Can't be undone.</div></div>
+        <button class="btn sm danger" id="set-delete">Delete account</button></div>`:''}
+      <div class="row"><div><div class="label">Reset everything</div>
+        <div class="hint">Wipe all accounts, scores and settings from this browser.</div></div>
+        <button class="btn sm danger" id="set-wipe">Reset all</button></div>
+    </div>`;
+
+  $('#set-music').onchange = e => { settings.musicDefault = e.target.checked; saveSettings(); };
+  $('#set-volume').oninput = e => { settings.musicVolume = +e.target.value; saveSettings(); };
+  $('#set-stretch').onchange = e => { settings.stretched = e.target.checked; saveSettings(); };
+  $('#set-hud').onchange = e => { settings.hudDefault = e.target.checked; saveSettings(); };
+  $('#set-accent').oninput = e => { settings.accent = e.target.value; saveSettings(); };
+  $('#set-demo').onchange = e => { settings.showDemo = e.target.checked; saveSettings(); };
+  const so = $('#set-signout'); if (so) so.onclick = logout;
+
+  $('#set-export').onclick = () => {
+    const blob = new Blob([JSON.stringify({ version:1, users:users(), scores:DB.get(K.scores,[]), settings }, null, 2)],
+      { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `amber-backup-${Date.now()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+  };
+  $('#set-import').onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try{
+      const data = JSON.parse(await f.text());
+      if (data.users) DB.set(K.users, Object.assign(users(), data.users));
+      if (Array.isArray(data.scores)) DB.set(K.scores, DB.get(K.scores,[]).concat(data.scores));
+      if (data.settings){ settings = Object.assign(settings, data.settings); saveSettings(); }
+      toast('Data imported'); renderNav(); renderSettings();
+    }catch{ toast('Invalid file'); }
+  };
+  const cs = $('#set-clearscores');
+  if (cs) cs.onclick = () => {
+    if (!confirm('Delete all of your submitted scores?')) return;
+    DB.set(K.scores, DB.get(K.scores,[]).filter(s=>s.userId!==currentUserId));
+    toast('Scores deleted'); renderSettings();
+  };
+  const del = $('#set-delete');
+  if (del) del.onclick = () => {
+    if (!confirm('Delete your account and all its scores? This cannot be undone.')) return;
+    const all = users(); delete all[currentUserId]; saveUsers(all);
+    DB.set(K.scores, DB.get(K.scores,[]).filter(s=>s.userId!==currentUserId));
+    setSession(null); toast('Account deleted'); location.hash = '#/';
+  };
+  $('#set-wipe').onclick = () => {
+    if (!confirm('Reset everything? All accounts, scores and settings will be erased.')) return;
+    [K.users,K.session,K.scores,K.settings,K.seeded].forEach(k=>localStorage.removeItem(k));
+    currentUserId = null;
+    settings = Object.assign({}, DEFAULT_SETTINGS);
+    seedDemo(); saveSettings(); renderNav(); renderSettings(); toast('Everything reset');
+  };
+}
+
+/* ---------- auth ---------- */
+function renderAuth(){
+  const signupMode = new URLSearchParams(location.hash.split('?')[1] || '').get('mode') === 'signup';
+  const u = currentUser();
+  if (u){
+    $('#auth-body').innerHTML = `
+      <div class="card" style="text-align:center;padding:40px 20px">
+        ${avatarHTML(u,64)}
+        <h2 style="margin:14px 0 6px">You're signed in as ${esc(u.username)}</h2>
+        <p class="muted" style="margin:0 0 20px">Manage your profile or head back to the game.</p>
+        <a class="btn primary" href="#/play">▶ Play</a>
+        <a class="btn" href="#/online">🌐 Online</a>
+        <a class="btn" href="#/profile">Edit profile</a>
+      </div>`;
+    return;
+  }
+  $('#auth-body').innerHTML = `
+    <div style="max-width:430px;margin:30px auto 0">
+      <div class="card">
+        <div class="card-head">
+          <h2>${signupMode?'Create account':'Welcome back'}</h2>
+          <button class="btn sm ghost" id="auth-swap">${signupMode?'Sign in':'Sign up'}</button>
+        </div>
+        <form id="auth-form">
+          <label class="field"><span>Username</span>
+            <input type="text" id="auth-user" autocomplete="username" required></label>
+          <label class="field"><span>Password</span>
+            <input type="password" id="auth-pass" autocomplete="${signupMode?'new-password':'current-password'}" required></label>
+          ${signupMode?`<label class="field"><span>Confirm password</span>
+            <input type="password" id="auth-pass2" autocomplete="new-password" required></label>`:''}
+          <button class="btn primary" type="submit" style="width:100%;justify-content:center">
+            ${signupMode?'Create account':'Sign in'}</button>
+          <div class="err" id="auth-err"></div>
+        </form>
+      </div>
+      <p class="muted" style="font-size:12.5px;text-align:center;line-height:1.6">
+        Accounts live in this browser's <code>localStorage</code> — not on a server. Passwords are hashed,
+        but this is <strong>not real security</strong>. Don't reuse a real password.
+      </p>
+    </div>`;
+
+  $('#auth-swap').onclick = () => { location.hash = signupMode ? '#/auth' : '#/auth?mode=signup'; };
+
+  $('#auth-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const err = $('#auth-err'); err.textContent = '';
+    const username = $('#auth-user').value, pass = $('#auth-pass').value;
+    try{
+      if (signupMode){
+        if (pass !== $('#auth-pass2').value) throw new Error('Passwords do not match.');
+        await signup(username, pass);
+        toast('Account created — welcome!');
+        location.hash = '#/profile';
+      }else{
+        await login(username, pass);
+        toast('Signed in');
+        location.hash = '#/';
+      }
+    }catch(ex){ err.textContent = ex.message; }
+  };
+}
+
+/* ---------- play / online entry ---------- */
+function enterPlay(){
+  unloadOnlineGame();
+  loadPlayGame();
+  applyStretch();
+  $('#hud').hidden = !settings.hudDefault;
+  $('#btn-hud').classList.toggle('on', settings.hudDefault);
+  musicUserPaused = false;
+  if (settings.musicDefault) tryStartMusic();
+}
+function enterOnline(){
+  unloadPlayGame();
+  renderLobby();
+  if (!netTimer) netTimer = setInterval(netPoll, NET.POLL);
+  netPoll();
+}
+
+/* one-time gesture unlock for music */
+document.addEventListener('pointerdown', () => {
+  if ((route() === 'play' || matchPhase !== 'idle') && music.paused && !musicUserPaused) tryStartMusic();
+});
+
+/* ============================================================
+   11. Boot
+============================================================ */
+applySettings();
+updateMusicBtn();
+if (!location.hash) location.hash = '#/';
+render();
+})();
+</script>
+</body>
+</html>
